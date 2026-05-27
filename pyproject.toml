@@ -1,7 +1,7 @@
 [project]
-name = "aether-vix-scraper"
+name = "vixsrc-scraper"
 version = "0.1.0"
-description = "Scraper for aether"
+description = "Scraper for vixsrc"
 readme = "README.md"
 authors = [
     { name = "SimoneFelici", email = "felicisimone9@gmail.com" }
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-aether-vix-scraper = "aether_vix_scraper:main"
+vixsrc-scraper = "vixsrc_scraper:main"
 
 [build-system]
 requires = ["uv_build>=0.11.16,<0.12.0"]

@@ -16,7 +16,7 @@ def run_ytdlp(video: str, output: Path) -> bool:
         return True
 
     ydl_opts = {
-        'concurrent_fragment_downloads': 5,
+        'concurrent_fragment_downloads': 4,
         'fragment_retries': 20,
         'skip_unavailable_fragments': False,
         'http_headers': HEADERS,
