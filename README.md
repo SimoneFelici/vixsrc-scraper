@@ -1,11 +1,11 @@
-# aether-vix-scraper
+# vixsrc-scraper
 
 Small CLI scraper for downloading movies or TV episodes from a vixsrc-compatible backend.
 
 ## Usage
 
 ```bash
-aether-vix-scraper [-h] [--url URL] --name NAME [--audiolang AUDIOLANG] \
+vixsrc-scraper [-h] [--url URL] --name NAME [--audiolang AUDIOLANG] \
   (--movieid MOVIEID | --showid SHOWID) \
   [--season SEASON [SEASON ...]] \
   [--episode EPISODE [EPISODE ...]]
@@ -28,31 +28,31 @@ aether-vix-scraper [-h] [--url URL] --name NAME [--audiolang AUDIOLANG] \
 Download a movie:
 
 ```bash
-aether-vix-scraper --movieid 12345 --name "Movie Name" --audiolang it
+vixsrc-scraper --movieid 12345 --name "Movie Name" --audiolang it
 ```
 
 Download a full season:
 
 ```bash
-aether-vix-scraper --showid 1618 --season 1 --name "Justice League" --audiolang it
+vixsrc-scraper --showid 1618 --season 1 --name "Justice League" --audiolang it
 ```
 
 Download multiple seasons:
 
 ```bash
-aether-vix-scraper --showid 1618 --season 1 2 3 --name "Justice League" --audiolang it
+vixsrc-scraper --showid 1618 --season 1 2 3 --name "Justice League" --audiolang it
 ```
 
 Download specific episodes:
 
 ```bash
-aether-vix-scraper --showid 1618 --season 1 --episode 1 4 25 --name "Justice League" --audiolang it
+vixsrc-scraper --showid 1618 --season 1 --episode 1 4 25 --name "Justice League" --audiolang it
 ```
 
 Download the same episode numbers across multiple seasons:
 
 ```bash
-aether-vix-scraper --showid 1618 --season 1 2 --episode 1 2 --name "Justice League" --audiolang it
+vixsrc-scraper --showid 1618 --season 1 2 --episode 1 2 --name "Justice League" --audiolang it
 ```
 
 ## Finding IDs
