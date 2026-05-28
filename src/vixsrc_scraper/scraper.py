@@ -6,6 +6,7 @@ from pathlib import Path
 import yt_dlp
 from yt_dlp.utils import DownloadError
 
+// TODO: CHANGE TO BE Language-agnostic
 HEADERS = {
     'Referer': 'https://aether.bar/media/idkidk123-test/12345/12345',
 }
