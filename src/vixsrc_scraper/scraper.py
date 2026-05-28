@@ -38,7 +38,7 @@ def scraper():
     expires = script.split("'expires': '")[1].split("'")[0]
     url     = script.split("masterPlaylist = {")[1].split("url: '")[1].split("'")[0]
     print(url, token, expires)
-    url = url + "?token=" + token + "&expires=" + expires + "&h=1&lang=it"
+    url = url + "?token=" + token + "&expires=" + expires + "&h=1"
     page = Fetcher.get(url)
 
     # Output

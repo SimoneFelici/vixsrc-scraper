@@ -32,6 +32,6 @@ for ep in {1..10}; do vixsrc-scraper -t tv -id SERIES_ID --name "Series Name" --
 --year           Optional output year
 --season         Season number, default: 1
 -ep              Episode number, default: 1
---audiolang      Optional audio language
+--audiolang      Optional audio language, ex: (ita, eng)
 --sublang        Optional subtitle language
 ```
