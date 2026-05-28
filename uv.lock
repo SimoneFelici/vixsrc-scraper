@@ -581,7 +581,7 @@ wheels = [
 
 [[package]]
 name = "vixsrc-scraper"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "scrapling", extra = ["fetchers"] },

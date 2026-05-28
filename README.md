@@ -7,20 +7,20 @@ Small scraper for VixSrc
 ### Movie
 
 ```bash
-vixsrc_scraper -t movie -id MOVIE_ID --name "Movie Name" --year 2019
+vixsrc-scraper -t movie -id MOVIE_ID --name "Movie Name" --year 2019
 ```
 
 ## TV
 
 ```bash
-vixsrc_scraper -t tv -id SERIES_ID --name "Series Name" --year 2010 --season 1 -ep 3
+vixsrc-scraper -t tv -id SERIES_ID --name "Series Name" --year 2010 --season 1 -ep 3
 ```
 
 ## Examples
 
 Download episodes 1 to 10 from season 1:
 ```bash
-for ep in {1..10}; do vixsrc_scraper -t tv -id SERIES_ID --name "Series Name" --year 2010 --season 1 -ep "$ep"; done
+for ep in {1..10}; do vixsrc-scraper -t tv -id SERIES_ID --name "Series Name" --year 2010 --season 1 -ep "$ep"; done
 ```
 
 ## Options
