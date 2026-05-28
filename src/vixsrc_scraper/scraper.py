@@ -1,209 +1,65 @@
-from scrapling.fetchers import Fetcher
-import argparse
-import json
-import base64
 from pathlib import Path
+from scrapling.fetchers import Fetcher
+import json
+import argparse
 import yt_dlp
-from yt_dlp.utils import DownloadError
 
-// TODO: CHANGE TO BE Language-agnostic
-HEADERS = {
-    'Referer': 'https://aether.bar/media/idkidk123-test/12345/12345',
-}
+root = "https://vixsrc.to/"
 
-def run_ytdlp(video: str, output: Path) -> bool:
-    if output.exists():
-        print(f'Already exists: {output}')
-        return True
-
-    ydl_opts = {
-        'concurrent_fragment_downloads': 4,
-        'fragment_retries': 20,
-        'skip_unavailable_fragments': False,
-        'http_headers': HEADERS,
-        'merge_output_format': 'mkv',
-        'remuxvideo': 'mkv',
-        'outtmpl': str(output.with_suffix('.%(ext)s')),
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            result = ydl.download([video])
-    except DownloadError:
-        print(f'yt-dlp failed: {output}')
-        return False
-
-    if result != 0:
-        print(f'yt-dlp failed: {output}')
-        return False
-
-    print(f'Completed: {output}')
-    return True
-
-def get_page(url: str):
-    return Fetcher.get(
-        url,
-        headers=HEADERS,
-        stealthy_headers=False,
-    )
-
-def build_movie_path(name: str) -> Path:
-    folder = Path(name)
-    folder.mkdir(parents=True, exist_ok=True)
-    return folder / f'{name}.mkv'
-
-
-def build_episode_path(name: str, season: int, ep: int) -> Path:
-    season_str = f'Season {season:02d}'
-    ep_str = f'S{season:02d}E{ep:02d}'
-
-    folder = Path(name) / season_str
-    folder.mkdir(parents=True, exist_ok=True)
-
-    return folder / f'{name} {ep_str}.mkv'
-
-def change_lang(video: str, urlang: str) -> str:
-    video, encoded = video.rsplit('/', 1)
-    padding = '=' * (-len(encoded) % 4)
-    decoded = base64.urlsafe_b64decode(encoded + padding).decode()
-    decoded = decoded.replace('lang=en', f'lang={urlang}')
-    encoded = base64.urlsafe_b64encode(decoded.encode()).decode().rstrip('=')
-    return video + '/' + encoded
-
-def fetch_video_url(endpoint_url: str, lang: str | None = None) -> str | None:
-    page = get_page(endpoint_url)
-
-    if page.status != 200:
-        print(f'Error fetching {endpoint_url}: HTTP {page.status}')
-        return None
-
-    try:
-        res = json.loads(page.body)
-    except json.JSONDecodeError as exc:
-        print(f'Error parsing JSON from {endpoint_url}: {exc}')
-        return None
-
-    if 'error' in res:
-        print(f'API error for {endpoint_url}: {res["error"]}')
-        return None
-
-    video = res.get('streamUrl')
-    if not video:
-        print(f'No streamUrl found for {endpoint_url}')
-        return None
-
-    if lang:
-        video = change_lang(video, lang)
-
-    return video
-
-def fetch_episode(base_url: str, show: str, season: int, ep: int, lang: str | None, name: str) -> bool:
-    endpoint_url = f'{base_url.rstrip("/")}/tv/{show}/{season}/{ep}'
-    video = fetch_video_url(endpoint_url, lang)
-
-    if not video:
-        return False
-
-    output = build_episode_path(name=name, season=season, ep=ep)
-    return run_ytdlp(video, output)
-
-def scraper() -> None:
-    parser = argparse.ArgumentParser(prog='aether-vix-scraper')
-    parser.add_argument('--url', default='https://vix.aether.bar/')
+def scraper():
+    parser = argparse.ArgumentParser(prog='vixsrc_scraper')
+    parser.add_argument('-t', '--type', required=True, choices=['movie', 'tv'])
+    parser.add_argument('-id', required=True)
     parser.add_argument('--name', required=True)
-    parser.add_argument('--audiolang')
-
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--movieid')
-    group.add_argument('--showid')
-
-    parser.add_argument(
-        '--season',
-        type=int,
-        nargs='+',
-        help='One or more seasons, e.g. --season 1 or --season 1 2 3',
-    )
-
-    parser.add_argument(
-        '--episode',
-        type=int,
-        nargs='+',
-        help='One or more episodes, e.g. --episode 1 or --episode 1 2 3',
-    )
-
+    parser.add_argument('--year', required=True)
+    parser.add_argument('--season', default=1, type=int)
+    parser.add_argument('-ep', default=1, type=int)
+    parser.add_argument('--audiolang', default=None)
+    parser.add_argument('--sublang', default=None)
     args = parser.parse_args()
 
-    if args.movieid:
-        if args.season or args.episode:
-            parser.error('--season/--episode can only be used with --showid')
-    
-        endpoint_url = f'{args.url.rstrip("/")}/movie/{args.movieid}'
-        video = fetch_video_url(endpoint_url, args.audiolang)
-    
-        if not video:
-            print('Error fetching movie')
-            raise SystemExit(1)
-    
-        output = build_movie_path(args.name)
-    
-        if not run_ytdlp(video, output):
-            raise SystemExit(1)
-    
-        return
+    if args.type == "movie":
+        url = root + "/api/movie/" + str(args.id)
+    else:
+        url = root + "/api/tv/" + str(args.id) + '/' + str(args.season) + '/' + str(args.ep) + '?lang=it'
 
-    if not args.season:
-        parser.error('--season is required when using --showid')
+    print(url)
+    page = Fetcher.get(url)
+    resp = json.loads(page.body)
+    url = root[:-1] + resp['src']
+    print(url)
+    page = Fetcher.get(url)
+    script = page.css("script::text").get()
+    token   = script.split("'token': '")[1].split("'")[0]
+    expires = script.split("'expires': '")[1].split("'")[0]
+    url     = script.split("masterPlaylist = {")[1].split("url: '")[1].split("'")[0]
+    print(url, token, expires)
+    url = url + "?token=" + token + "&expires=" + expires + "&h=1&lang=it"
+    page = Fetcher.get(url)
 
-    seasons: list[int] = args.season
-    episodes: list[int] | None = args.episode
+    if args.type == "movie":
+        folder = Path(f"{args.name} ({args.year})")
+        output = folder / f"{args.name} ({args.year}).%(ext)s"
+    else:
+        folder = Path(f"{args.name} ({args.year})") / f"Season {args.season:02d}"
+        output = folder / f"{args.name} S{args.season:02d}E{args.ep:02d}.%(ext)s"
 
-    failed: list[str] = []
+    audio_format = f'bestaudio[language={args.audiolang}]' if args.audiolang else 'bestaudio'
 
-    for season in seasons:
-        if episodes:
-            for ep in episodes:
-                label = f'S{season:02d}E{ep:02d}'
-                print(f'--- {label} ---')
+    ydl_opts = {
+        'format': f'bestvideo+{audio_format}/best',
+        'concurrent_fragment_downloads': 4,
+        'merge_output_format': 'mkv',
+        'outtmpl': str(output),
+    }
 
-                ok = fetch_episode(
-                    base_url=args.url,
-                    show=args.showid,
-                    season=season,
-                    ep=ep,
-                    lang=args.audiolang,
-                    name=args.name,
-                )
+    if args.sublang:
+        ydl_opts['writesubtitles'] = True
+        ydl_opts['subtitleslangs'] = [args.sublang]
+        ydl_opts['subtitlesformat'] = 'srt'
 
-                if not ok:
-                    print(f'Failed: {label}')
-                    failed.append(label)
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
 
-            continue
-
-        ep = 1
-        downloaded = 0
-
-        print(f'--- Season {season:02d} ---')
-
-        while fetch_episode(
-            base_url=args.url,
-            show=args.showid,
-            season=season,
-            ep=ep,
-            lang=args.audiolang,
-            name=args.name,
-        ):
-            downloaded += 1
-            ep += 1
-
-        if downloaded == 0:
-            print(f'No episodes downloaded for season {season}')
-            failed.append(f'S{season:02d}')
-        else:
-            print(f'Season {season} done - {downloaded} episodes downloaded')
-
-    if failed:
-        print('Failed items:')
-        for item in failed:
-            print(f'  {item}')
-        raise SystemExit(1)
+if __name__ == "__main__":
+    scraper()
