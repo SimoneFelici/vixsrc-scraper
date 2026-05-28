@@ -59,7 +59,7 @@ def scraper():
 
     ydl_opts = {
         'format': f'bestvideo+{audio_format}/best',
-        'concurrent_fragment_downloads': args.concurrent_fragments,
+        'concurrent_fragment_downloads': args.fragments,
         'merge_output_format': 'mkv',
         'outtmpl': str(output),
     }
