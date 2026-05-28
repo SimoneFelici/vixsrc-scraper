@@ -1,72 +1,36 @@
-# vixsrc-scraper
+# vixsrc_scraper
 
-Small CLI scraper for downloading movies or TV episodes from a vixsrc-compatible backend.
+Small scraper for VixSrc movies and TV
 
 ## Usage
 
+### Movie
+
 ```bash
-vixsrc-scraper [-h] [--url URL] --name NAME [--audiolang AUDIOLANG] \
-  (--movieid MOVIEID | --showid SHOWID) \
-  [--season SEASON [SEASON ...]] \
-  [--episode EPISODE [EPISODE ...]]
+vixsrc_scraper -t movie -id MOVIE_ID --name "Movie Name" --year 2019
 ```
 
-## Options
 
-| Option | Description |
-|---|---|
-| `--url` | vixsrc backend URL. Defaults to `https://vix.aether.bar/`. |
-| `--name` | Movie or TV show name. Used for output folders/files, roughly Jellyfin-style. |
-| `--audiolang` | Audio language code, for example `it` or `en`. |
-| `--movieid` | Movie ID. Mutually exclusive with `--showid`. |
-| `--showid` | TV show ID. Mutually exclusive with `--movieid`. |
-| `--season` | One or more season numbers. Required when using `--showid`. |
-| `--episode` | One or more episode numbers. Optional. If omitted, the whole season is downloaded. |
+## TV
+
+```bash
+vixsrc_scraper -t tv -id SERIES_ID --name "Series Name" --year 2010 --season 1 -ep 3
+```
 
 ## Examples
 
-Download a movie:
-
 ```bash
-vixsrc-scraper --movieid 12345 --name "Movie Name" --audiolang it
+for ep in {1..10}; do vixsrc_scraper -t tv -id SERIES_ID --name "Series Name" --year 2010 --season 1 -ep "$ep"; done
 ```
 
-Download a full season:
-
+## Options
 ```bash
-vixsrc-scraper --showid 1618 --season 1 --name "Justice League" --audiolang it
-```
-
-Download multiple seasons:
-
-```bash
-vixsrc-scraper --showid 1618 --season 1 2 3 --name "Justice League" --audiolang it
-```
-
-Download specific episodes:
-
-```bash
-vixsrc-scraper --showid 1618 --season 1 --episode 1 4 25 --name "Justice League" --audiolang it
-```
-
-Download the same episode numbers across multiple seasons:
-
-```bash
-vixsrc-scraper --showid 1618 --season 1 2 --episode 1 2 --name "Justice League" --audiolang it
-```
-
-## Finding IDs
-
-You can get the ID from the Aether URL.
-
-Example:
-
-```text
-https://aether.bar/media/tmdb-tv-1618-justice-league/4435/82451
-```
-
-In this case, the show ID is:
-
-```text
-1618
+-t, --type       Content type: movie or tv
+-id              Movie or series ID
+--name           Movie or series name
+--year           Movie or series year
+--season         Season number, default: 1
+-ep              Episode number, default: 1
+--audiolang      Optional audio language
+--sublang        Optional subtitle language
 ```
