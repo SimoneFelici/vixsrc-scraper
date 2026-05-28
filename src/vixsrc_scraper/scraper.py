@@ -7,17 +7,21 @@ import yt_dlp
 root = "https://vixsrc.to/"
 
 def scraper():
+    # Args
     parser = argparse.ArgumentParser(prog='vixsrc_scraper')
     parser.add_argument('-t', '--type', required=True, choices=['movie', 'tv'])
     parser.add_argument('-id', required=True)
     parser.add_argument('--name', required=True)
-    parser.add_argument('--year', required=True)
+    parser.add_argument('--year', default=None)
     parser.add_argument('--season', default=1, type=int)
     parser.add_argument('-ep', default=1, type=int)
     parser.add_argument('--audiolang', default=None)
     parser.add_argument('--sublang', default=None)
+    parser.add_argument('--fragments', default=4, type=int)
+
     args = parser.parse_args()
 
+    # Video fetcher
     if args.type == "movie":
         url = root + "/api/movie/" + str(args.id)
     else:
@@ -37,18 +41,25 @@ def scraper():
     url = url + "?token=" + token + "&expires=" + expires + "&h=1&lang=it"
     page = Fetcher.get(url)
 
-    if args.type == "movie":
-        folder = Path(f"{args.name} ({args.year})")
-        output = folder / f"{args.name} ({args.year}).%(ext)s"
+    # Output
+    if args.year:
+        title = f"{args.name} ({args.year})"
     else:
-        folder = Path(f"{args.name} ({args.year})") / f"Season {args.season:02d}"
+        title = args.name
+    
+    if args.type == "movie":
+        folder = Path(title)
+        output = folder / f"{title}.%(ext)s"
+    else:
+        folder = Path(title) / f"Season {args.season:02d}"
         output = folder / f"{args.name} S{args.season:02d}E{args.ep:02d}.%(ext)s"
 
+    # Download
     audio_format = f'bestaudio[language={args.audiolang}]' if args.audiolang else 'bestaudio'
 
     ydl_opts = {
         'format': f'bestvideo+{audio_format}/best',
-        'concurrent_fragment_downloads': 4,
+        'concurrent_fragment_downloads': args.concurrent_fragments,
         'merge_output_format': 'mkv',
         'outtmpl': str(output),
     }
@@ -60,6 +71,3 @@ def scraper():
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
-
-if __name__ == "__main__":
-    scraper()
