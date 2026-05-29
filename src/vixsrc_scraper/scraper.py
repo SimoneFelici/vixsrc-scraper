@@ -55,13 +55,20 @@ def scraper():
         output = folder / f"{args.name} S{args.season:02d}E{args.ep:02d}.%(ext)s"
 
     # Download
-    audio_format = f'bestaudio[language={args.audiolang}]' if args.audiolang else 'bestaudio'
+    if args.audiolang:
+        format_selector = f'bestvideo+bestaudio[language={args.audiolang}]/best[language={args.audiolang}]'
+    else:
+        format_selector = 'bestvideo+bestaudio/best'
 
     ydl_opts = {
-        'format': f'bestvideo+{audio_format}/best',
+        'format': format_selector,
         'concurrent_fragment_downloads': args.fragments,
         'merge_output_format': 'mkv',
         'outtmpl': str(output),
+        'postprocessors': [{
+            'key': 'FFmpegVideoRemuxer',
+            'preferedformat': 'mkv',
+        }],
     }
 
     if args.sublang:
