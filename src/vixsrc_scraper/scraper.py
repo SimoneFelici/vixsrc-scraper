@@ -25,7 +25,7 @@ def scraper():
     if args.type == "movie":
         url = root + "/api/movie/" + str(args.id)
     else:
-        url = root + "/api/tv/" + str(args.id) + '/' + str(args.season) + '/' + str(args.ep) + '?lang=it'
+        url = root + "/api/tv/" + str(args.id) + '/' + str(args.season) + '/' + str(args.ep)
 
     print(url)
     page = Fetcher.get(url)
